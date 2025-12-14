@@ -36,10 +36,10 @@ const menuItems = [
 ];
 
 const schedule = [
-  { day: "Mon-Wed", location: "Downtown Austin", address: "Congress Ave & 6th St", time: "11AM - 3PM" },
-  { day: "Thu-Fri", location: "East Austin", address: "E 6th St & Chicon", time: "5PM - 10PM" },
-  { day: "Saturday", location: "Mueller Farmers Market", address: "Mueller Lake Park", time: "9AM - 1PM" },
-  { day: "Sunday", location: "Private Events Only", address: "Book us for your event!", time: "By Appointment" },
+  { day: "Wed-Sun", location: "Circles Lounge Café", address: "18110 Midway Rd STE 134, Dallas, TX 75287", time: "Kitchen Open 4PM" },
+  { day: "Weekdays", location: "Food Truck Service", address: "Dallas, Texas", time: "Call for Location" },
+  { day: "Catering", location: "Private Events", address: "Book us for your event!", time: "By Appointment" },
+  { day: "Orders", location: "Call Ahead", address: "Fresh made & tasty meals", time: "(469) 427-9730" },
 ];
 
 const CravinsHome = () => {
@@ -92,7 +92,7 @@ const CravinsHome = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 text-primary text-sm font-medium mb-6">
               <MapPin className="w-4 h-4" />
-              Now Serving Austin, TX
+              Now Serving Dallas, TX
             </div>
             <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
               Taste the
@@ -125,13 +125,13 @@ const CravinsHome = () => {
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium opacity-80">TODAY'S LOCATION</p>
-                <p className="text-xl font-bold">Downtown Austin — Congress Ave & 6th St</p>
+                <p className="text-sm font-medium opacity-80">FIND US AT CIRCLES</p>
+                <p className="text-xl font-bold">18110 Midway Rd STE 134, Dallas, TX 75287</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              <span className="font-semibold">11AM - 3PM</span>
+              <span className="font-semibold">Wed-Sun • Kitchen Open 4PM</span>
             </div>
           </div>
         </div>
@@ -254,7 +254,7 @@ const CravinsHome = () => {
             </Button>
             <Button size="xl" variant="outline" className="border-background text-background hover:bg-background/10">
               <Phone className="w-5 h-5" />
-              (512) 555-CRAV
+              (469) 427-9730
             </Button>
           </div>
         </div>
@@ -306,9 +306,11 @@ const CravinsHome = () => {
           <Instagram className="w-10 h-10 mx-auto mb-4" />
           <h2 className="font-display text-3xl font-bold mb-2">Follow the Flavor</h2>
           <p className="opacity-80 mb-6">Daily updates, location alerts, and food pics that'll make you hungry</p>
-          <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-            @CravinsTX
-          </Button>
+          <a href="https://instagram.com/cravins.tx" target="_blank" rel="noopener noreferrer">
+            <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              @cravins.tx
+            </Button>
+          </a>
         </div>
       </section>
 
@@ -323,7 +325,7 @@ const CravinsHome = () => {
                 </div>
                 <span className="font-display text-2xl font-bold">CravinsTX</span>
               </div>
-              <p className="text-sm text-muted-foreground">Bringing authentic Texas flavors to the streets of Austin since 2019.</p>
+              <p className="text-sm text-muted-foreground">Freshly made & tasty meals serving Dallas, Texas.</p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
@@ -337,8 +339,9 @@ const CravinsHome = () => {
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> (512) 555-CRAV</li>
-                <li className="flex items-center gap-2"><Instagram className="w-4 h-4" /> @CravinsTX</li>
+                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> (469) 427-9730</li>
+                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> (646) 643-6144</li>
+                <li className="flex items-center gap-2"><Instagram className="w-4 h-4" /> @cravins.tx</li>
               </ul>
             </div>
             <div>

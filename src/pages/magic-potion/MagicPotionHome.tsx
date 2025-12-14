@@ -91,7 +91,7 @@ const MagicPotionHome = () => {
               <span className="text-gradient-primary">CULTURE</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto mb-10">
-              Premium streetwear for those who dare to stand out. Limited drops. Infinite impact.
+              Where Style Meets Enchantment. Unleash your inner Magic with every thread.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="neon" size="xl">
@@ -190,10 +190,13 @@ const MagicPotionHome = () => {
             JOIN THE <span className="text-primary">MOVEMENT</span>
           </h2>
           <p className="text-muted-foreground mb-8">Follow us on Instagram for exclusive drops and behind-the-scenes content</p>
-          <Button variant="neon" size="xl">
-            <Instagram className="w-5 h-5" />
-            @MAGICPOTIONAPPAREL
-          </Button>
+          <a href="https://instagram.com/magicpotionapparel" target="_blank" rel="noopener noreferrer">
+            <Button variant="neon" size="xl">
+              <Instagram className="w-5 h-5" />
+              @magicpotionapparel
+            </Button>
+          </a>
+          <p className="text-muted-foreground text-sm mt-4">MagicPotion By Elixirtx</p>
         </div>
       </section>
 
