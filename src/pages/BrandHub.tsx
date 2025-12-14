@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const brands = [
   {
@@ -30,8 +31,14 @@ const brands = [
 ];
 
 const BrandHub = () => {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", !isDark);
+  }, [isDark]);
+
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden noise-overlay">
+    <div className={`min-h-screen ${isDark ? 'bg-[hsl(0,0%,4%)]' : 'bg-[hsl(0,0%,98%)]'} relative overflow-hidden noise-overlay transition-colors duration-300`}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-float" />
@@ -39,7 +46,7 @@ const BrandHub = () => {
         <div className="absolute -bottom-40 right-1/3 w-72 h-72 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "4s" }} />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
+      <div className="relative z-10 container mx-auto px-4 py-20 flex flex-col items-center min-h-screen">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -47,20 +54,20 @@ const BrandHub = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/5 border border-foreground/10 mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">Three Brands. One Vision.</span>
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'} border mb-6`}>
+            <Sparkles className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+            <span className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Three Brands. One Vision.</span>
           </div>
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-            <span className="text-gradient-primary">Our Brands</span>
+            <span className="text-gradient-primary">Awujayz</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Discover our portfolio of businesses, each crafted with passion and purpose.
+          <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} max-w-2xl mx-auto`}>
+            Professional Business Solution Consultant & CEO.
           </p>
         </motion.header>
 
-        {/* Brand Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Brand Cards - Centered */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto w-full">
           {brands.map((brand, index) => (
             <motion.div
               key={brand.id}
@@ -70,7 +77,7 @@ const BrandHub = () => {
             >
               <Link
                 to={brand.path}
-                className="group block relative overflow-hidden rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-500"
+                className={`group block relative overflow-hidden rounded-2xl ${isDark ? 'bg-[hsl(0,0%,7%)] border-[hsl(0,0%,18%)] hover:border-purple-500/50' : 'bg-white border-gray-200 hover:border-purple-400/50'} border transition-all duration-500`}
               >
                 {/* Gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${brand.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
@@ -84,15 +91,15 @@ const BrandHub = () => {
                     </span>
                   </div>
 
-                  <h2 className="font-display text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  <h2 className={`font-display text-2xl font-bold mb-2 ${isDark ? 'group-hover:text-purple-400' : 'group-hover:text-purple-600'} transition-colors`}>
                     {brand.name}
                   </h2>
-                  <p className="text-primary font-medium mb-3">{brand.tagline}</p>
-                  <p className="text-muted-foreground text-sm mb-6 flex-grow">
+                  <p className={`${isDark ? 'text-purple-400' : 'text-purple-600'} font-medium mb-3`}>{brand.tagline}</p>
+                  <p className={`${isDark ? 'text-gray-500' : 'text-gray-600'} text-sm mb-6 flex-grow`}>
                     {brand.description}
                   </p>
 
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                  <div className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-gray-500 group-hover:text-purple-400' : 'text-gray-600 group-hover:text-purple-600'} transition-colors`}>
                     <span>Explore</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -102,14 +109,26 @@ const BrandHub = () => {
           ))}
         </div>
 
-        {/* Footer */}
+        {/* Spacer to push footer down */}
+        <div className="flex-grow" />
+
+        {/* Footer with Dark/Light toggle */}
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-20 text-sm text-muted-foreground"
+          className="w-full pt-20 flex items-center justify-between"
         >
-          <p>© 2024 Brand Portfolio. All rights reserved.</p>
+          <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+            © 2024 Awujayz. All rights reserved.
+          </p>
+          <button
+            onClick={() => setIsDark(!isDark)}
+            className={`p-2 rounded-full ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black'} transition-colors`}
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
         </motion.footer>
       </div>
     </div>

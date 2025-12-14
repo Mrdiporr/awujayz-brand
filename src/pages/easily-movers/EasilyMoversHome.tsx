@@ -13,15 +13,15 @@ const services = [
   },
   {
     icon: Trash2,
-    title: "Junk Removal",
+    title: "Junk Hauling",
     description: "Fast, eco-friendly disposal of unwanted items and debris.",
     features: ["Same-Day Service", "Eco-Friendly Disposal", "Estate Cleanouts"],
   },
   {
     icon: Spray,
-    title: "Cleaning Services",
-    description: "Professional deep cleaning for homes and businesses.",
-    features: ["Move-In/Move-Out", "Commercial Cleaning", "Post-Construction"],
+    title: "Handyman Services",
+    description: "Professional home services including TV hanging and more.",
+    features: ["TV Mounting", "Home Repairs", "General Handyman"],
   },
 ];
 
@@ -67,9 +67,9 @@ const EasilyMoversHome = () => {
             <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
           </div>
           <div className="flex items-center gap-4">
-            <a href="tel:+1234567890" className="hidden md:flex items-center gap-2 text-sm font-semibold text-primary">
+            <a href="tel:+16466436144" className="hidden md:flex items-center gap-2 text-sm font-semibold text-primary">
               <Phone className="w-4 h-4" />
-              (512) 555-MOVE
+              (646) 643-6144
             </a>
             <Button variant="trust">Get Free Quote</Button>
           </div>
@@ -88,7 +88,7 @@ const EasilyMoversHome = () => {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <MapPin className="w-4 h-4" />
-                Serving All of Texas
+                Serving Dallas-Fort Worth, Austin & Houston
               </div>
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Moving & Services
@@ -256,7 +256,7 @@ const EasilyMoversHome = () => {
             </Button>
             <Button variant="outline" size="xl" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
               <Phone className="w-5 h-5" />
-              (512) 555-MOVE
+              (646) 643-6144
             </Button>
           </div>
         </div>
@@ -286,17 +286,18 @@ const EasilyMoversHome = () => {
             <div>
               <h4 className="font-semibold mb-4">Service Areas</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Dallas-Fort Worth</li>
                 <li>Austin</li>
-                <li>Dallas</li>
                 <li>Houston</li>
-                <li>San Antonio</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> (512) 555-MOVE</li>
+                <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> (646) 643-6144</li>
                 <li className="flex items-center gap-2"><Clock className="w-4 h-4" /> Mon-Sat: 7AM-8PM</li>
+                <li className="text-xs">elixirtxservices@gmail.com</li>
+                <li className="text-xs">IG: @elixir.txservices</li>
               </ul>
             </div>
           </div>
