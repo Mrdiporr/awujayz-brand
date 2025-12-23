@@ -45,7 +45,7 @@ const MagicPotionHome = () => {
             MAGIC<span className="text-primary">POTION</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/magic-potion" className="text-sm tracking-wide hover:text-primary transition-colors">SHOP</Link>
+            <Link to="/magic-potion/shop" className="text-sm tracking-wide hover:text-primary transition-colors">SHOP</Link>
             <Link to="/magic-potion" className="text-sm tracking-wide hover:text-primary transition-colors">LOOKBOOK</Link>
             <Link to="/magic-potion" className="text-sm tracking-wide hover:text-primary transition-colors">ABOUT</Link>
           </div>

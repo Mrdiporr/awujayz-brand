@@ -57,16 +57,15 @@ const CravinsHome = () => {
             </span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/cravins" className="text-sm font-medium hover:text-primary transition-colors">Menu</Link>
+            <Link to="/cravins/menu" className="text-sm font-medium hover:text-primary transition-colors">Menu</Link>
             <Link to="/cravins" className="text-sm font-medium hover:text-primary transition-colors">Find Us</Link>
-            <Link to="/cravins" className="text-sm font-medium hover:text-primary transition-colors">Catering</Link>
-            <Link to="/cravins" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
+            <Link to="/cravins/catering" className="text-sm font-medium hover:text-primary transition-colors">Catering</Link>
           </div>
           <div className="flex items-center gap-4">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 hover:text-primary transition-colors">
               <Instagram className="w-5 h-5" />
             </a>
-            <Button variant="warm">Order Catering</Button>
+            <Link to="/cravins/catering"><Button variant="warm">Order Catering</Button></Link>
           </div>
         </div>
       </nav>
