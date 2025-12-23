@@ -63,15 +63,14 @@ const EasilyMoversHome = () => {
           <div className="hidden md:flex items-center gap-8">
             <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">Services</Link>
             <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
-            <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">Reviews</Link>
-            <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
+            <Link to="/easily-movers/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
           </div>
           <div className="flex items-center gap-4">
             <a href="tel:+16466436144" className="hidden md:flex items-center gap-2 text-sm font-semibold text-primary">
               <Phone className="w-4 h-4" />
               (646) 643-6144
             </a>
-            <Button variant="trust">Get Free Quote</Button>
+            <Link to="/easily-movers/contact"><Button variant="trust">Get Free Quote</Button></Link>
           </div>
         </div>
       </nav>
