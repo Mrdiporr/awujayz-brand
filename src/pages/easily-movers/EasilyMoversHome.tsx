@@ -62,7 +62,7 @@ const EasilyMoversHome = () => {
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">Services</Link>
-            <Link to="/easily-movers" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
+            <Link to="/easily-movers/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
             <Link to="/easily-movers/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
           </div>
           <div className="flex items-center gap-4">
