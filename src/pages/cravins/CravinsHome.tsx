@@ -59,6 +59,7 @@ const CravinsHome = () => {
           <div className="hidden md:flex items-center gap-8">
             <Link to="/cravins/menu" className="text-sm font-medium hover:text-primary transition-colors">Menu</Link>
             <Link to="/cravins" className="text-sm font-medium hover:text-primary transition-colors">Find Us</Link>
+            <Link to="/cravins/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
             <Link to="/cravins/catering" className="text-sm font-medium hover:text-primary transition-colors">Catering</Link>
           </div>
           <div className="flex items-center gap-4">
