@@ -31,25 +31,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAdminRole = async (): Promise<boolean> => {
     if (!user) return false;
-    
+
     try {
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin'
-      });
-      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
       if (error) {
         console.error('Error checking admin role:', error);
         return false;
       }
-      
-      setIsAdmin(data === true);
-      return data === true;
+
+      const admin = !!data;
+      setIsAdmin(admin);
+      return admin;
     } catch (err) {
       console.error('Error checking admin role:', err);
       return false;
     }
   };
+
 
   useEffect(() => {
     // Set up auth state listener FIRST
