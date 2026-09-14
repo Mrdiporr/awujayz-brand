@@ -1,0 +1,6 @@
+- [ ] Add durable orders and order items for Magic Potion checkout
+- [ ] Add append-only audit logging for admin mutations
+- [ ] Add real-time inquiry refresh and server-side pagination for products/menu
+- [ ] Add secure admin user management and role assignment
+- [ ] Connect shop cart to checkout and order confirmation
+- [ ] Add sales metrics to the admin overview
