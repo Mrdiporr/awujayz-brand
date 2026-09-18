@@ -5,7 +5,11 @@ import {
   ShoppingBag, 
   UtensilsCrossed, 
   Truck,
-  LogOut
+  LogOut,
+  ClipboardList,
+  Users,
+  ScrollText,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -27,9 +31,12 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Inquiries', url: '/admin/inquiries', icon: MessageSquare },
+  { title: 'Orders', url: '/admin/orders', icon: ClipboardList },
   { title: 'Products', url: '/admin/products', icon: ShoppingBag },
   { title: 'Menu Items', url: '/admin/menu', icon: UtensilsCrossed },
   { title: 'Services', url: '/admin/services', icon: Truck },
+  { title: 'Users', url: '/admin/users', icon: Users },
+  { title: 'Audit Log', url: '/admin/audit', icon: ScrollText },
 ];
 
 const AdminSidebar = () => {
@@ -46,14 +53,14 @@ const AdminSidebar = () => {
   };
 
   return (
-    <Sidebar className="border-r border-border/50" collapsible="icon">
-      <SidebarHeader className="border-b border-border/50 p-4">
+    <Sidebar className="border-r border-sidebar-border" collapsible="icon">
+      <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link to="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">TX</span>
+          <div className="flex h-8 w-8 items-center justify-center border border-sidebar-border bg-sidebar-accent">
+            <span className="text-sidebar-foreground font-bold text-xs">AW</span>
           </div>
           {!collapsed && (
-            <span className="font-display text-lg font-semibold">Admin</span>
+            <span className="font-display text-base font-semibold">Awujayz Ops</span>
           )}
         </Link>
       </SidebarHeader>
@@ -83,6 +90,12 @@ const AdminSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 p-4">
+        <Button asChild variant="ghost" size={collapsed ? 'icon' : 'default'} className="mb-1 w-full justify-start">
+          <Link to="/">
+            <ExternalLink className="h-4 w-4" />
+            {!collapsed && <span className="ml-2">View ecosystem</span>}
+          </Link>
+        </Button>
         {!collapsed && user && (
           <div className="mb-3 text-xs text-muted-foreground truncate">
             {user.email}

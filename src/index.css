@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,20 +5,20 @@
 @layer base {
   /* ===== BRAND HUB (Default/Root) ===== */
   :root {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 14%;
-    --accent-foreground: 0 0% 98%;
+    --background: 220 12% 5%;
+    --foreground: 45 38% 95%;
+    --card: 220 10% 8%;
+    --card-foreground: 45 38% 95%;
+    --popover: 220 10% 8%;
+    --popover-foreground: 45 38% 95%;
+    --primary: 292 54% 50%;
+    --primary-foreground: 45 38% 95%;
+    --secondary: 220 8% 14%;
+    --secondary-foreground: 45 38% 95%;
+    --muted: 220 8% 14%;
+    --muted-foreground: 220 6% 63%;
+    --accent: 220 8% 14%;
+    --accent-foreground: 45 38% 95%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 18%;
@@ -33,8 +31,9 @@
     --brand-accent: 180 100% 50%;
 
     /* Typography */
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --success: 152 62% 42%;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
   }
 
   /* ===== MAGIC POTION APPAREL ===== */
@@ -45,7 +44,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 270 15% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 280 100% 60%;
+    --primary: 292 54% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 270 15% 12%;
     --secondary-foreground: 0 0% 98%;
@@ -63,8 +62,8 @@
     --brand-accent: 180 100% 50%;
     --brand-neon: 320 100% 55%;
 
-    --font-display: 'Bebas Neue', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
   }
 
   /* ===== EASILY MOVERS ===== */
@@ -75,7 +74,7 @@
     --card-foreground: 215 25% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
-    --primary: 215 90% 45%;
+    --primary: 176 100% 20%;
     --primary-foreground: 0 0% 100%;
     --secondary: 25 95% 55%;
     --secondary-foreground: 0 0% 100%;
@@ -93,8 +92,8 @@
     --brand-energy: 25 95% 55%;
     --brand-success: 145 65% 42%;
 
-    --font-display: 'Inter', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
   }
 
   /* ===== CRAVINS TX ===== */
@@ -105,7 +104,7 @@
     --card-foreground: 20 25% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 25% 12%;
-    --primary: 15 85% 50%;
+    --primary: 12 72% 48%;
     --primary-foreground: 0 0% 100%;
     --secondary: 45 95% 55%;
     --secondary-foreground: 20 25% 12%;
@@ -124,8 +123,46 @@
     --brand-spice: 0 75% 55%;
     --brand-earth: 25 35% 25%;
 
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  .theme-admin {
+    --background: 220 12% 5%;
+    --foreground: 45 38% 95%;
+    --card: 220 10% 8%;
+    --card-foreground: 45 38% 95%;
+    --popover: 220 10% 8%;
+    --popover-foreground: 45 38% 95%;
+    --primary: 45 38% 95%;
+    --primary-foreground: 220 12% 5%;
+    --secondary: 220 8% 14%;
+    --secondary-foreground: 45 38% 95%;
+    --muted: 220 8% 14%;
+    --muted-foreground: 220 6% 63%;
+    --accent: 176 100% 20%;
+    --accent-foreground: 45 38% 95%;
+    --border: 220 8% 18%;
+    --input: 220 8% 18%;
+    --ring: 176 100% 28%;
+    --sidebar-background: 220 12% 4%;
+    --sidebar-foreground: 45 38% 90%;
+    --sidebar-primary: 45 38% 95%;
+    --sidebar-primary-foreground: 220 12% 5%;
+    --sidebar-accent: 220 8% 13%;
+    --sidebar-accent-foreground: 45 38% 95%;
+    --sidebar-border: 220 8% 16%;
+    --sidebar-ring: 176 100% 28%;
+  }
+
+  .light.ecosystem-hub {
+    --background: 45 38% 95%;
+    --foreground: 220 12% 5%;
+    --card: 45 30% 91%;
+    --card-foreground: 220 12% 5%;
+    --muted: 45 18% 86%;
+    --muted-foreground: 220 7% 38%;
+    --border: 220 8% 76%;
   }
 }
 
@@ -139,9 +176,31 @@
     font-family: var(--font-body);
   }
 
+  html { scroll-behavior: smooth; }
+  ::selection { background: hsl(var(--primary) / 0.35); }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .theme-magic-potion nav, .theme-easily-movers nav, .theme-cravins nav { height: 4rem; }
+  .theme-magic-potion section, .theme-easily-movers section, .theme-cravins section { position: relative; }
+  .theme-magic-potion .rounded-2xl, .theme-easily-movers .rounded-2xl, .theme-cravins .rounded-2xl { border-radius: 0.25rem; }
+  .theme-magic-potion .rounded-xl, .theme-easily-movers .rounded-xl, .theme-cravins .rounded-xl { border-radius: 0.25rem; }
+  .hub-magic { --primary: 292 54% 50%; }
+  .hub-movers { --primary: 176 100% 20%; }
+  .hub-cravins { --primary: 12 72% 48%; }
 }
 
 @layer utilities {

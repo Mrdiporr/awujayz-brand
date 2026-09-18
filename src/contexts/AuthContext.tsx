@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -8,7 +8,6 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   checkAdminRole: () => Promise<boolean>;
 }
@@ -29,14 +28,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkAdminRole = async (): Promise<boolean> => {
-    if (!user) return false;
+  const checkAdminRole = useCallback(async (): Promise<boolean> => {
+    const { data: userData } = await supabase.auth.getUser();
+    const activeUser = userData.user;
+    if (!activeUser) {
+      setIsAdmin(false);
+      return false;
+    }
 
     try {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', activeUser.id)
         .eq('role', 'admin')
         .maybeSingle();
 
@@ -52,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error checking admin role:', err);
       return false;
     }
-  };
+  }, []);
 
 
   useEffect(() => {
@@ -88,25 +92,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkAdminRole]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    });
-    return { error };
-  };
-
-  const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/admin`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
     });
     return { error };
   };
@@ -118,16 +109,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAdmin(false);
   };
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     session,
     isLoading,
     isAdmin,
     signIn,
-    signUp,
     signOut,
     checkAdminRole,
-  };
+  }), [user, session, isLoading, isAdmin, checkAdminRole]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

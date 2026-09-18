@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Shield } from 'lucide-react';
 import { z } from 'zod';
@@ -19,9 +18,8 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('login');
   
-  const { signIn, signUp, user, isAdmin, isLoading, checkAdminRole } = useAuth();
+  const { signIn, user, isLoading, checkAdminRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -38,7 +36,7 @@ const AdminLogin = () => {
     }
   }, [user, isLoading, navigate, from, checkAdminRole]);
 
-  const handleSubmit = async (e: React.FormEvent, isLogin: boolean) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validation = authSchema.safeParse({ email, password });
@@ -54,7 +52,6 @@ const AdminLogin = () => {
     setIsSubmitting(true);
 
     try {
-      if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
@@ -81,23 +78,6 @@ const AdminLogin = () => {
           description: 'Successfully logged in.',
         });
         navigate(from, { replace: true });
-      } else {
-        const { error } = await signUp(email, password);
-        if (error) {
-          toast({
-            title: 'Signup Failed',
-            description: error.message,
-            variant: 'destructive',
-          });
-          return;
-        }
-        
-        toast({
-          title: 'Account Created',
-          description: 'Your account has been created. Contact an admin to get admin privileges.',
-        });
-        setActiveTab('login');
-      }
     } catch (err) {
       toast({
         title: 'Error',
@@ -118,10 +98,11 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur">
+    <div className="theme-admin min-h-screen bg-background text-foreground flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute left-6 top-6 font-display text-sm font-semibold">AWUJAYZ <span className="text-muted-foreground">/ OPS</span></div>
+      <Card className="w-full max-w-md border-border bg-card shadow-2xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="mx-auto mb-4 w-12 h-12 border border-border bg-secondary flex items-center justify-center">
             <Shield className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-display">Admin Portal</CardTitle>
@@ -130,14 +111,7 @@ const AdminLogin = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={(e) => handleSubmit(e, true)} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
                   <Input
@@ -171,45 +145,7 @@ const AdminLogin = () => {
                   )}
                 </Button>
               </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
-                    'Create Account'
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <p className="mt-4 text-center text-xs text-muted-foreground">Accounts are provisioned by an administrator.</p>
           
           <div className="mt-6 text-center">
             <Button variant="ghost" onClick={() => navigate('/')}>
