@@ -27,6 +27,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAuditLog from "./pages/admin/AdminAuditLog";
 import NotFound from "./pages/NotFound";
+import PublicMobileNav from "./components/public/PublicMobileNav";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <PublicMobileNav />
           <Routes>
             {/* Brand Hub - Main Landing */}
             <Route path="/" element={<BrandHub />} />
