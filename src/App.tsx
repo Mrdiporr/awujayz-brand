@@ -23,6 +23,9 @@ import AdminInquiries from "./pages/admin/AdminInquiries";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMenuItems from "./pages/admin/AdminMenuItems";
 import AdminServices from "./pages/admin/AdminServices";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAuditLog from "./pages/admin/AdminAuditLog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +69,9 @@ const App = () => (
               <Route path="products" element={<AdminProducts />} />
               <Route path="menu" element={<AdminMenuItems />} />
               <Route path="services" element={<AdminServices />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="audit" element={<AdminAuditLog />} />
             </Route>
             
             {/* Catch-all 404 */}
