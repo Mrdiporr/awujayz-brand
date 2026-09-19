@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const cateringPackages = [
   {
@@ -49,23 +50,17 @@ const CravinsCatering = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Catering Request Received!",
-      description: "We'll get back to you within 24 hours with a custom quote.",
+    const { error } = await supabase.from('inquiries').insert({
+      brand: 'cravins', inquiry_type: formData.eventType || 'Catering', name: formData.name,
+      email: formData.email, phone: formData.phone, event_date: formData.eventDate,
+      guest_count: Number(formData.guestCount), message: formData.message,
     });
-
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      eventDate: "",
-      guestCount: "",
-      eventType: "",
-      message: "",
-    });
+    if (error) {
+      toast({ title: "We couldn't send your request", description: 'Please call (469) 427-9730 and we will help directly.', variant: 'destructive' });
+    } else {
+      toast({ title: "Catering Request Received!", description: "We'll get back to you within 24 hours with a custom quote." });
+      setFormData({ name: "", email: "", phone: "", eventDate: "", guestCount: "", eventType: "", message: "" });
+    }
     setIsSubmitting(false);
   };
 

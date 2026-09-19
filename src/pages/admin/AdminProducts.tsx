@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Product = Tables<'products'>;
@@ -42,6 +42,9 @@ const initialFormState: ProductInsert = {
 };
 
 const AdminProducts = () => {
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductInsert>(initialFormState);
@@ -49,17 +52,21 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
+  const { data: result, isLoading } = useQuery({
+    queryKey: ['products', page, search],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .ilike('name', `%${search.replace(/[%(),]/g, '')}%`)
+        .order('created_at', { ascending: false })
+        .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
       if (error) throw error;
-      return data;
+      return { rows: data, count: count ?? 0 };
     },
   });
+  const products = result?.rows;
+  const pageCount = Math.max(1, Math.ceil((result?.count ?? 0) / PAGE_SIZE));
 
   const createMutation = useMutation({
     mutationFn: async (product: ProductInsert) => {
@@ -247,6 +254,7 @@ const AdminProducts = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <div className="relative max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(0); }} placeholder="Search products..." className="pl-9" /></div>
 
       {/* Table */}
       <div className="border rounded-lg">
@@ -313,6 +321,7 @@ const AdminProducts = () => {
           </TableBody>
         </Table>
       </div>
+      <div className="flex items-center justify-between text-sm text-muted-foreground"><span>{result?.count ?? 0} products</span><div className="flex items-center gap-2"><Button variant="outline" size="icon" disabled={page === 0} onClick={() => setPage((value) => value - 1)}><ChevronLeft className="h-4 w-4" /></Button><span>{page + 1} / {pageCount}</span><Button variant="outline" size="icon" disabled={page + 1 >= pageCount} onClick={() => setPage((value) => value + 1)}><ChevronRight className="h-4 w-4" /></Button></div></div>
     </div>
   );
 };
