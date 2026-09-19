@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const services = [
   "Moving Services",
@@ -37,24 +38,23 @@ const EasilyMoversContact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Quote Request Received!",
-      description: "We'll contact you within 2 hours with a free estimate.",
+    const details = [
+      formData.moveDate && `Preferred date: ${formData.moveDate}`,
+      formData.fromAddress && `From: ${formData.fromAddress}`,
+      formData.toAddress && `To: ${formData.toAddress}`,
+      formData.message,
+    ].filter(Boolean).join('\n');
+    const { error } = await supabase.from('inquiries').insert({
+      brand: 'easily_movers', inquiry_type: formData.service, name: formData.name,
+      email: formData.email, phone: formData.phone, message: details,
+      event_date: formData.moveDate || null,
     });
-
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      service: "",
-      moveDate: "",
-      fromAddress: "",
-      toAddress: "",
-      message: "",
-    });
+    if (error) {
+      toast({ title: "We couldn't send your request", description: 'Please call (646) 643-6144 for immediate help.', variant: 'destructive' });
+    } else {
+      toast({ title: "Quote Request Received!", description: "We'll contact you within 2 hours with a free estimate." });
+      setFormData({ name: "", email: "", phone: "", service: "", moveDate: "", fromAddress: "", toAddress: "", message: "" });
+    }
     setIsSubmitting(false);
   };
 

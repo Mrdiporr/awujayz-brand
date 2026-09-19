@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -29,12 +29,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Search, Eye, Trash2, Loader2 } from 'lucide-react';
+import { Search, Eye, Trash2, Loader2, ChevronLeft, ChevronRight, Radio } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Inquiry = Tables<'inquiries'>;
 
 const AdminInquiries = () => {
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [brandFilter, setBrandFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -45,10 +47,10 @@ const AdminInquiries = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: inquiries, isLoading } = useQuery({
-    queryKey: ['inquiries', brandFilter, statusFilter],
+  const { data: inquiryResult, isLoading } = useQuery({
+    queryKey: ['inquiries', brandFilter, statusFilter, search, page],
     queryFn: async () => {
-      let query = supabase.from('inquiries').select('*').order('created_at', { ascending: false });
+      let query = supabase.from('inquiries').select('*', { count: 'exact' }).order('created_at', { ascending: false });
       
       if (brandFilter !== 'all') {
         query = query.eq('brand', brandFilter);
@@ -56,12 +58,24 @@ const AdminInquiries = () => {
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
       }
+      const term = search.trim().replace(/[%(),]/g, '');
+      if (term) query = query.or(`name.ilike.%${term}%,email.ilike.%${term}%`);
       
-      const { data, error } = await query;
+      const { data, count, error } = await query.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
       if (error) throw error;
-      return data;
+      return { rows: data, count: count ?? 0 };
     },
   });
+
+  useEffect(() => {
+    const channel = supabase.channel('admin-inquiries-live').on('postgres_changes', { event: '*', schema: 'public', table: 'inquiries' }, () => {
+      queryClient.invalidateQueries({ queryKey: ['inquiries'] });
+      queryClient.invalidateQueries({ queryKey: ['new-inquiries-count'] });
+    }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
+
+  useEffect(() => { setPage(0); }, [brandFilter, statusFilter, search]);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes: string }) => {
@@ -98,10 +112,8 @@ const AdminInquiries = () => {
     },
   });
 
-  const filteredInquiries = inquiries?.filter((inquiry) =>
-    inquiry.name.toLowerCase().includes(search.toLowerCase()) ||
-    inquiry.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredInquiries = inquiryResult?.rows;
+  const pageCount = Math.max(1, Math.ceil((inquiryResult?.count ?? 0) / PAGE_SIZE));
 
   const handleView = (inquiry: Inquiry) => {
     setSelectedInquiry(inquiry);
@@ -120,15 +132,15 @@ const AdminInquiries = () => {
   };
 
   const brandColors: Record<string, string> = {
-    'magic-potion': 'bg-purple-500/10 text-purple-500',
-    'easily-movers': 'bg-green-500/10 text-green-500',
-    'cravins': 'bg-orange-500/10 text-orange-500',
+    magic_potion: 'border-primary/30 text-primary',
+    easily_movers: 'border-accent text-foreground',
+    cravins: 'border-destructive/30 text-destructive',
   };
 
   const statusColors: Record<string, string> = {
-    new: 'bg-blue-500/10 text-blue-500',
-    contacted: 'bg-yellow-500/10 text-yellow-500',
-    resolved: 'bg-green-500/10 text-green-500',
+    new: 'border-primary/30 text-primary',
+    contacted: 'border-muted-foreground/30 text-muted-foreground',
+    resolved: 'border-success/30 text-success',
   };
 
   return (
@@ -136,6 +148,7 @@ const AdminInquiries = () => {
       <div>
         <h2 className="text-2xl font-display font-bold">Inquiries</h2>
         <p className="text-muted-foreground">Manage customer inquiries across all brands</p>
+        <p className="mt-2 flex items-center gap-2 text-xs text-success"><Radio className="h-3 w-3" /> Live updates active</p>
       </div>
 
       {/* Filters */}
@@ -155,8 +168,8 @@ const AdminInquiries = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Brands</SelectItem>
-            <SelectItem value="magic-potion">Magic Potion</SelectItem>
-            <SelectItem value="easily-movers">Easily Movers</SelectItem>
+            <SelectItem value="magic_potion">Magic Potion</SelectItem>
+            <SelectItem value="easily_movers">Easily Movers</SelectItem>
             <SelectItem value="cravins">Cravins TX</SelectItem>
           </SelectContent>
         </Select>
@@ -171,6 +184,10 @@ const AdminInquiries = () => {
             <SelectItem value="resolved">Resolved</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>{inquiryResult?.count ?? 0} inquiries</span>
+        <div className="flex items-center gap-2"><Button variant="outline" size="icon" aria-label="Previous page" disabled={page === 0} onClick={() => setPage((value) => value - 1)}><ChevronLeft className="h-4 w-4" /></Button><span>Page {page + 1} of {pageCount}</span><Button variant="outline" size="icon" aria-label="Next page" disabled={page + 1 >= pageCount} onClick={() => setPage((value) => value + 1)}><ChevronRight className="h-4 w-4" /></Button></div>
       </div>
 
       {/* Table */}
