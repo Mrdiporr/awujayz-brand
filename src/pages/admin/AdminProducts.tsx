@@ -55,7 +55,7 @@ const AdminProducts = () => {
   const { data: result, isLoading } = useQuery({
     queryKey: ['products', page, search],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, count, error } = await supabase
         .from('products')
         .select('*', { count: 'exact' })
         .ilike('name', `%${search.replace(/[%(),]/g, '')}%`)

@@ -45,7 +45,7 @@ const EasilyMoversContact = () => {
       formData.message,
     ].filter(Boolean).join('\n');
     const { error } = await supabase.from('inquiries').insert({
-      brand: 'easily_movers', inquiry_type: formData.service, name: formData.name,
+      brand: 'easily-movers', inquiry_type: formData.service, name: formData.name,
       email: formData.email, phone: formData.phone, message: details,
       event_date: formData.moveDate || null,
     });

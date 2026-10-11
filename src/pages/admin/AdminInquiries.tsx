@@ -132,15 +132,15 @@ const AdminInquiries = () => {
   };
 
   const brandColors: Record<string, string> = {
-    magic_potion: 'border-primary/30 text-primary',
-    easily_movers: 'border-accent text-foreground',
+    'magic-potion': 'border-primary/30 text-primary',
+    'easily-movers': 'border-accent text-foreground',
     cravins: 'border-destructive/30 text-destructive',
   };
 
   const statusColors: Record<string, string> = {
     new: 'border-primary/30 text-primary',
     contacted: 'border-muted-foreground/30 text-muted-foreground',
-    resolved: 'border-success/30 text-success',
+    completed: 'border-success/30 text-success',
   };
 
   return (
@@ -168,8 +168,8 @@ const AdminInquiries = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Brands</SelectItem>
-            <SelectItem value="magic_potion">Magic Potion</SelectItem>
-            <SelectItem value="easily_movers">Easily Movers</SelectItem>
+            <SelectItem value="magic-potion">Magic Potion</SelectItem>
+            <SelectItem value="easily-movers">Easily Movers</SelectItem>
             <SelectItem value="cravins">Cravins TX</SelectItem>
           </SelectContent>
         </Select>
@@ -181,7 +181,9 @@ const AdminInquiries = () => {
             <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="new">New</SelectItem>
             <SelectItem value="contacted">Contacted</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="quoted">Quoted</SelectItem>
+            <SelectItem value="confirmed">Confirmed</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -324,7 +326,10 @@ const AdminInquiries = () => {
                   <SelectContent>
                     <SelectItem value="new">New</SelectItem>
                     <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="quoted">Quoted</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
