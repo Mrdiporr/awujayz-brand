@@ -1,437 +1,112 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Instagram, ArrowLeft, X, Plus, Minus, Trash2, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, CheckCircle2, Loader2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import magicHero from '@/assets/magic-potion-hero.jpg';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  badge: string | null;
-  description: string;
-  sizes: string[];
-}
-
-interface CartItem extends Product {
-  quantity: number;
-  selectedSize: string;
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "MYSTIC DROP TEE",
-    price: 65,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80",
-    category: "Tees",
-    badge: "NEW",
-    description: "Premium cotton tee with signature mystic drop graphic",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 2,
-    name: "VOID HOODIE",
-    price: 120,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
-    category: "Hoodies",
-    badge: "BESTSELLER",
-    description: "Heavyweight hoodie with embroidered void logo",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 3,
-    name: "ASTRAL JOGGERS",
-    price: 85,
-    image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&q=80",
-    category: "Bottoms",
-    badge: null,
-    description: "Comfortable joggers with astral pattern details",
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 4,
-    name: "PHANTOM CAP",
-    price: 45,
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&q=80",
-    category: "Accessories",
-    badge: "LIMITED",
-    description: "Structured cap with phantom embroidery",
-    sizes: ["One Size"],
-  },
-  {
-    id: 5,
-    name: "ECLIPSE JACKET",
-    price: 180,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80",
-    category: "Outerwear",
-    badge: "NEW",
-    description: "Windbreaker with reflective eclipse print",
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 6,
-    name: "NEON DREAMS TEE",
-    price: 55,
-    image: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500&q=80",
-    category: "Tees",
-    badge: null,
-    description: "Relaxed fit tee with neon graphic print",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    id: 7,
-    name: "SHADOW SHORTS",
-    price: 65,
-    image: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=500&q=80",
-    category: "Bottoms",
-    badge: null,
-    description: "Athletic shorts with shadow gradient",
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 8,
-    name: "COSMIC BEANIE",
-    price: 35,
-    image: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=500&q=80",
-    category: "Accessories",
-    badge: null,
-    description: "Ribbed beanie with cosmic patch",
-    sizes: ["One Size"],
-  },
-];
-
-const categories = ["All", "Tees", "Hoodies", "Bottoms", "Outerwear", "Accessories"];
+type Product = Tables<'products'>;
+type CartItem = Product & { quantity: number; selectedSize: string };
+const apparelSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+const accessorySizes = ['One Size'];
 
 const MagicPotionShop = () => {
   const { toast } = useToast();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedSize, setSelectedSize] = useState("");
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [selected, setSelected] = useState<Product | null>(null);
+  const [selectedSize, setSelectedSize] = useState('M');
+  const [category, setCategory] = useState('All');
+  const [submitting, setSubmitting] = useState(false);
+  const [order, setOrder] = useState<{ id: string; total: number } | null>(null);
+  const [customer, setCustomer] = useState({ name: '', email: '', phone: '', address: '' });
 
-  const filteredProducts = selectedCategory === "All" 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+  const { data: products = [], isLoading, isError } = useQuery({
+    queryKey: ['shop-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*').eq('in_stock', true).order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+  const categories = useMemo(() => ['All', ...Array.from(new Set(products.map((product) => product.category).filter(Boolean) as string[]))], [products]);
+  const visibleProducts = category === 'All' ? products : products.filter((product) => product.category === category);
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
+  const sizesFor = (product: Product) => product.category?.toLowerCase().includes('access') ? accessorySizes : apparelSizes;
   const addToCart = (product: Product, size: string) => {
-    const existingItem = cart.find(item => item.id === product.id && item.selectedSize === size);
-    
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id && item.selectedSize === size
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1, selectedSize: size }]);
-    }
-    
-    toast({
-      title: "Added to bag",
-      description: `${product.name} (${size}) has been added to your bag.`,
+    setCart((current) => {
+      const match = current.find((item) => item.id === product.id && item.selectedSize === size);
+      return match ? current.map((item) => item === match ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { ...product, selectedSize: size, quantity: 1 }];
     });
-    
-    setSelectedProduct(null);
-    setSelectedSize("");
+    setSelected(null);
+    toast({ title: 'Added to bag', description: `${product.name} · ${size}` });
   };
+  const changeQuantity = (id: string, size: string, amount: number) => setCart((current) => current.map((item) => item.id === id && item.selectedSize === size ? { ...item, quantity: Math.max(0, item.quantity + amount) } : item).filter((item) => item.quantity > 0));
 
-  const updateQuantity = (id: number, size: string, delta: number) => {
-    setCart(cart.map(item => {
-      if (item.id === id && item.selectedSize === size) {
-        const newQuantity = item.quantity + delta;
-        return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
-  };
-
-  const removeFromCart = (id: number, size: string) => {
-    setCart(cart.filter(item => !(item.id === id && item.selectedSize === size)));
+  const placeOrder = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke('create-order', { body: {
+      customerName: customer.name, customerEmail: customer.email, customerPhone: customer.phone,
+      shippingAddress: customer.address,
+      items: cart.map((item) => ({ productId: item.id, quantity: item.quantity, selectedSize: item.selectedSize })),
+    } });
+    setSubmitting(false);
+    if (error || data?.error) {
+      toast({ title: 'Order could not be saved', description: data?.error ?? error?.message ?? 'Please try again.', variant: 'destructive' });
+      return;
+    }
+    setOrder({ id: data.orderId, total: Number(data.total) });
+    setCart([]);
   };
 
   return (
     <div className="theme-magic-potion min-h-screen bg-background text-foreground">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/magic-potion" className="font-display text-2xl tracking-wider">
-            MAGIC<span className="text-primary">POTION</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link to="/magic-potion/shop" className="text-sm tracking-wide text-primary transition-colors">SHOP</Link>
-            <Link to="/magic-potion" className="text-sm tracking-wide hover:text-primary transition-colors">LOOKBOOK</Link>
-            <Link to="/magic-potion" className="text-sm tracking-wide hover:text-primary transition-colors">ABOUT</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="https://instagram.com/magicpotionapparel" target="_blank" rel="noopener noreferrer" className="p-2 hover:text-primary transition-colors">
-              <Instagram className="w-5 h-5" />
-            </a>
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="p-2 hover:text-primary transition-colors relative"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground font-bold">
-                {cartCount}
-              </span>
-            </button>
-          </div>
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+        <div className="container flex h-16 items-center justify-between">
+          <Link to="/magic-potion" className="font-display text-xl font-bold uppercase">Magic<span className="text-primary">Potion</span></Link>
+          <div className="hidden items-center gap-7 md:flex"><Link to="/magic-potion" className="text-xs font-bold uppercase">Home</Link><Link to="/magic-potion/shop" className="text-xs font-bold uppercase text-primary">Shop</Link><Link to="/magic-potion/about" className="text-xs font-bold uppercase">About</Link></div>
+          <Button size="icon" variant="ghost" onClick={() => setCartOpen(true)} aria-label={`Open bag with ${count} items`}><ShoppingBag className="h-5 w-5" /><span className="absolute ml-7 -mt-7 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{count}</span></Button>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-24 pb-8">
-        <div className="container mx-auto px-4">
-          <Link to="/magic-potion" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="font-display text-5xl md:text-6xl tracking-tight mb-4">
-              THE <span className="text-gradient-primary">COLLECTION</span>
-            </h1>
-            <p className="text-muted-foreground">
-              Where style meets enchantment. Unleash your inner magic with every thread.
-            </p>
-          </div>
-        </div>
-      </section>
+      <header className="relative mt-16 min-h-[440px] overflow-hidden border-b border-border">
+        <img src={magicHero} alt="Magic Potion Apparel collection" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="container relative flex min-h-[440px] flex-col justify-end py-14"><Link to="/magic-potion" className="mb-auto inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Back</Link><p className="mb-3 text-xs font-bold uppercase text-primary">MagicPotion by ElixirTX</p><h1 className="max-w-3xl font-display text-5xl font-bold uppercase md:text-7xl">Wear your inner magic.</h1><p className="mt-4 max-w-xl text-muted-foreground">Where style meets enchantment. Limited apparel, managed live and made to stand apart.</p></div>
+      </header>
 
-      {/* Category Filter */}
-      <section className="py-6 border-y border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                  selectedCategory === category
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                {category}
+      <main>
+        <section className="border-b border-border py-5"><div className="container flex gap-2 overflow-x-auto">{categories.map((item) => <Button key={item} variant={category === item ? 'default' : 'outline'} size="sm" onClick={() => setCategory(item)}>{item}</Button>)}</div></section>
+        <section className="container py-12">
+          {isLoading ? <div className="flex justify-center py-24"><Loader2 className="h-7 w-7 animate-spin" /></div> : isError ? <p className="py-24 text-center text-muted-foreground">The collection is temporarily unavailable.</p> : visibleProducts.length === 0 ? <p className="py-24 text-center text-muted-foreground">No pieces are available in this collection yet.</p> : (
+            <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visibleProducts.map((product) => <article key={product.id} className="group">
+              <button className="relative block aspect-[4/5] w-full overflow-hidden border border-border bg-secondary text-left" onClick={() => { setSelected(product); setSelectedSize(sizesFor(product)[0]); }}>
+                <img src={product.image_url || magicHero} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                {product.badge && <span className="absolute left-3 top-3 bg-background px-3 py-1 text-[10px] font-bold uppercase">{product.badge}</span>}
               </button>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="mt-4 flex justify-between gap-3"><div><h2 className="font-display font-semibold uppercase">{product.name}</h2><p className="text-sm text-muted-foreground">{product.category || 'Apparel'}</p></div><p className="font-semibold text-primary">${Number(product.price).toFixed(2)}</p></div>
+            </article>)}</div>
+          )}
+        </section>
+      </main>
 
-      {/* Products Grid */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="group cursor-pointer"
-                onClick={() => {
-                  setSelectedProduct(product);
-                  setSelectedSize(product.sizes[0]);
-                }}
-              >
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary mb-4">
-                  {product.badge && (
-                    <span className="absolute top-3 left-3 z-10 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold tracking-wider rounded">
-                      {product.badge}
-                    </span>
-                  )}
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                    <Button variant="neon" size="sm" className="w-full">
-                      QUICK ADD
-                    </Button>
-                  </div>
-                </div>
-                <h3 className="font-display text-lg tracking-wide mb-1">{product.name}</h3>
-                <p className="text-muted-foreground text-sm mb-1">{product.category}</p>
-                <p className="text-primary font-bold">${product.price}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {selected && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm" onClick={() => setSelected(null)}><div className="grid max-h-[90vh] w-full max-w-4xl overflow-y-auto border border-border bg-card md:grid-cols-2" onClick={(event) => event.stopPropagation()}><img src={selected.image_url || magicHero} alt={selected.name} className="aspect-square h-full w-full object-cover md:aspect-auto" /><div className="relative flex flex-col p-7"><Button variant="ghost" size="icon" className="absolute right-3 top-3" onClick={() => setSelected(null)}><X /></Button><p className="text-xs font-bold uppercase text-primary">{selected.category || 'Collection'}</p><h2 className="mt-3 font-display text-3xl font-bold uppercase">{selected.name}</h2><p className="mt-4 text-muted-foreground">{selected.description}</p><p className="mt-5 text-2xl font-bold">${Number(selected.price).toFixed(2)}</p><div className="mt-8"><Label>Size</Label><div className="mt-2 flex flex-wrap gap-2">{sizesFor(selected).map((size) => <Button key={size} size="sm" variant={selectedSize === size ? 'default' : 'outline'} onClick={() => setSelectedSize(size)}>{size}</Button>)}</div></div><Button className="mt-8" size="lg" onClick={() => addToCart(selected, selectedSize)}><ShoppingBag className="mr-2 h-5 w-5" /> Add to bag</Button></div></div></div>}
 
-      {/* Product Modal */}
-      <AnimatePresence>
-        {selectedProduct && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setSelectedProduct(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-card rounded-xl p-6 max-w-lg w-full shadow-2xl border border-border"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="font-display text-2xl tracking-wide">{selectedProduct.name}</h2>
-                <button onClick={() => setSelectedProduct(null)} className="p-2 hover:text-primary transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="aspect-square rounded-lg overflow-hidden mb-4">
-                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
-              </div>
-              <p className="text-muted-foreground mb-4">{selectedProduct.description}</p>
-              <p className="text-primary font-bold text-2xl mb-4">${selectedProduct.price}</p>
-              
-              <div className="mb-6">
-                <p className="text-sm font-medium mb-2">Size</p>
-                <div className="flex gap-2 flex-wrap">
-                  {selectedProduct.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 rounded border text-sm font-medium transition-colors ${
-                        selectedSize === size
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "border-border hover:border-primary"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <Button 
-                variant="neon" 
-                size="lg" 
-                className="w-full"
-                onClick={() => addToCart(selectedProduct, selectedSize)}
-              >
-                <ShoppingBag className="w-5 h-5" />
-                ADD TO BAG
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {cartOpen && <div className="fixed inset-0 z-[80] bg-background/70 backdrop-blur-sm" onClick={() => setCartOpen(false)}><aside className="ml-auto flex h-full w-full max-w-md flex-col border-l border-border bg-card" onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between border-b border-border p-5"><h2 className="font-display text-xl font-semibold uppercase">Your bag · {count}</h2><Button size="icon" variant="ghost" onClick={() => setCartOpen(false)}><X /></Button></div><div className="flex-1 space-y-5 overflow-y-auto p-5">{cart.length === 0 ? <div className="py-20 text-center text-muted-foreground"><ShoppingBag className="mx-auto mb-4 h-10 w-10" />Your bag is empty.</div> : cart.map((item) => <div key={`${item.id}-${item.selectedSize}`} className="grid grid-cols-[72px_1fr_auto] gap-3 border-b border-border pb-5"><img src={item.image_url || magicHero} alt="" className="h-[88px] w-[72px] object-cover" /><div><h3 className="text-sm font-semibold uppercase">{item.name}</h3><p className="text-xs text-muted-foreground">Size {item.selectedSize}</p><div className="mt-3 flex items-center gap-2"><Button size="icon" variant="outline" className="h-7 w-7" onClick={() => changeQuantity(item.id, item.selectedSize, -1)}><Minus className="h-3 w-3" /></Button><span className="w-4 text-center text-sm">{item.quantity}</span><Button size="icon" variant="outline" className="h-7 w-7" onClick={() => changeQuantity(item.id, item.selectedSize, 1)}><Plus className="h-3 w-3" /></Button></div></div><div className="text-right"><p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p><Button size="icon" variant="ghost" className="mt-2" onClick={() => setCart((current) => current.filter((entry) => entry !== item))}><Trash2 className="h-4 w-4" /></Button></div></div>)}</div>{cart.length > 0 && <div className="border-t border-border p-5"><div className="mb-4 flex justify-between"><span className="text-muted-foreground">Subtotal</span><strong>${subtotal.toFixed(2)}</strong></div><Button className="w-full" size="lg" onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}>Secure order checkout</Button><p className="mt-3 text-center text-xs text-muted-foreground">Payment is arranged after order review.</p></div>}</aside></div>}
 
-      {/* Cart Drawer */}
-      <AnimatePresence>
-        {isCartOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-              onClick={() => setIsCartOpen(false)}
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-card border-l border-border shadow-2xl flex flex-col"
-            >
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <h2 className="font-display text-2xl tracking-wide">YOUR BAG ({cartCount})</h2>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:text-primary transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                {cart.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">Your bag is empty</p>
-                    <Button variant="neon-outline" className="mt-4" onClick={() => setIsCartOpen(false)}>
-                      Continue Shopping
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {cart.map((item) => (
-                      <div key={`${item.id}-${item.selectedSize}`} className="flex gap-4">
-                        <img src={item.image} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
-                        <div className="flex-1">
-                          <h3 className="font-display text-sm tracking-wide">{item.name}</h3>
-                          <p className="text-muted-foreground text-xs mb-2">Size: {item.selectedSize}</p>
-                          <div className="flex items-center gap-2">
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.selectedSize, -1)}
-                              className="w-6 h-6 rounded border border-border flex items-center justify-center hover:border-primary transition-colors"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="text-sm w-6 text-center">{item.quantity}</span>
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.selectedSize, 1)}
-                              className="w-6 h-6 rounded border border-border flex items-center justify-center hover:border-primary transition-colors"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-primary font-bold">${item.price * item.quantity}</p>
-                          <button 
-                            onClick={() => removeFromCart(item.id, item.selectedSize)}
-                            className="text-muted-foreground hover:text-destructive transition-colors mt-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {cart.length > 0 && (
-                <div className="p-6 border-t border-border">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-display text-xl">${cartTotal}</span>
-                  </div>
-                  <Button variant="neon" size="lg" className="w-full">
-                    CHECKOUT
-                  </Button>
-                  <p className="text-center text-muted-foreground text-xs mt-4">
-                    Shipping calculated at checkout
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {checkoutOpen && <div className="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-background/90 p-4 backdrop-blur-sm"><div className="relative w-full max-w-xl border border-border bg-card p-6 md:p-8"><Button size="icon" variant="ghost" className="absolute right-3 top-3" onClick={() => { setCheckoutOpen(false); setOrder(null); }}><X /></Button>{order ? <div className="py-8 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-success" /><h2 className="mt-5 font-display text-3xl font-bold uppercase">Order received</h2><p className="mt-3 text-muted-foreground">Reference {order.id.slice(0, 8).toUpperCase()} · ${order.total.toFixed(2)}</p><p className="mx-auto mt-4 max-w-sm text-sm text-muted-foreground">Your order is saved. The team will contact you to confirm availability, payment, and delivery.</p><Button className="mt-7" onClick={() => { setCheckoutOpen(false); setOrder(null); }}>Continue shopping</Button></div> : <form onSubmit={placeOrder}><p className="text-xs font-bold uppercase text-primary">Order checkout</p><h2 className="mt-2 font-display text-3xl font-bold uppercase">Shipping details</h2><p className="mt-2 text-sm text-muted-foreground">Your total is verified against the live catalog before the order is saved.</p><div className="mt-7 grid gap-5 sm:grid-cols-2"><div><Label htmlFor="checkout-name">Full name</Label><Input id="checkout-name" className="mt-2" required value={customer.name} onChange={(event) => setCustomer({ ...customer, name: event.target.value })} /></div><div><Label htmlFor="checkout-email">Email</Label><Input id="checkout-email" className="mt-2" type="email" required value={customer.email} onChange={(event) => setCustomer({ ...customer, email: event.target.value })} /></div><div className="sm:col-span-2"><Label htmlFor="checkout-phone">Phone</Label><Input id="checkout-phone" className="mt-2" type="tel" value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} /></div><div className="sm:col-span-2"><Label htmlFor="checkout-address">Shipping address</Label><Textarea id="checkout-address" className="mt-2" required rows={3} value={customer.address} onChange={(event) => setCustomer({ ...customer, address: event.target.value })} /></div></div><div className="mt-7 flex items-center justify-between border-y border-border py-4"><span>Order total</span><strong className="text-xl">${subtotal.toFixed(2)}</strong></div><Button type="submit" size="lg" className="mt-6 w-full" disabled={submitting}>{submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Place order</Button><p className="mt-3 text-center text-xs text-muted-foreground">No card will be charged today.</p></form>}</div></div>}
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-border">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p className="font-display tracking-wider">MAGIC<span className="text-primary">POTION</span></p>
-          <p>© 2024 Magic Potion Apparel. All rights reserved.</p>
-          <Link to="/" className="hover:text-primary transition-colors">← Back to Brand Hub</Link>
-        </div>
-      </footer>
+      <footer className="border-t border-border py-8"><div className="container flex flex-col justify-between gap-3 text-sm text-muted-foreground sm:flex-row"><span>© {new Date().getFullYear()} Magic Potion Apparel</span><a href="https://instagram.com/magicpotionapparel" target="_blank" rel="noreferrer">@magicpotionapparel</a><Link to="/">Awujayz ecosystem</Link></div></footer>
     </div>
   );
 };
