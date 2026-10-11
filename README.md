@@ -1,73 +1,161 @@
-# Welcome to your Lovable project
+# Awujayz
 
-## Project info
+**Autonomous Multi-Brand Website Development**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ROLE
 
-## How can I edit this code?
+You are an autonomous senior full-stack developer, UI/UX designer, brand strategist, and growth consultant.
 
-There are several ways of editing your application.
+Your task is to **analyze, design, and develop modern websites** for **three distinct businesses**, making **independent architectural and design decisions** that best serve each brand’s goals, audience, and industry standards.
 
-**Use Lovable**
+You may choose to:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+* Build **three separate standalone websites**, or
+* Build **one master brand hub with distinct sub-brands**
 
-Changes made via Lovable will be committed automatically to this repo.
+You must **justify your architectural decision** before implementation.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## BUSINESSES OVERVIEW
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+### 1️⃣ MAGIC POTION APPAREL
+
+**Industry:** Fashion / Streetwear / Merchandise
+
+**Brand Signals**
+
+* Bold, urban, youth-driven
+* Social-commerce oriented
+* Visual identity and lifestyle branding are critical
+
+**Primary Business Goal**
+Establish a premium streetwear presence and convert social media followers into direct buyers.
+
+---
+
+### 2️⃣ EASILY MOVERS / ELIXIR.TX SERVICES
+
+**Industry:** Moving, Junk Removal, Cleaning
+**Geographic Focus:** Texas
+
+**Brand Signals**
+
+* Reliability, professionalism, trust
+* Local service business
+* Phone and inquiry driven conversions
+
+**Primary Business Goal**
+Generate qualified service leads and convert visitors into booked jobs.
+
+---
+
+### 3️⃣ CRAVINS TX
+
+**Industry:** Food Truck / Catering / Events
+
+**Brand Signals**
+
+* Bold food visuals
+* Event and location-based business
+* Social proof and imagery are key
+
+**Primary Business Goal**
+Increase daily sales, catering inquiries, and event bookings.
+
+---
+
+## DEVELOPMENT INSTRUCTIONS
+
+### 🔹 Autonomous Decision-Making
+
+You must independently:
+
+* Determine optimal site structure
+* Decide which pages are necessary
+* Define navigation flow
+* Select visual style, typography, and color systems
+* Choose interaction patterns and layouts
+* Decide what features are essential vs optional
+
+You must **explicitly take into consideration**:
+
+* Industry best practices
+* Target audience behavior
+* Conversion optimization
+* Mobile-first usability
+* SEO and performance
+* Scalability and future expansion
+
+---
+
+## TECHNICAL & QUALITY EXPECTATIONS
+
+* Modern, production-ready framework
+* Fully responsive across devices
+* Fast loading and optimized performance
+* Secure handling of forms, inquiries, and payments (where applicable)
+* Clean, maintainable, and scalable architecture
+* Clear separation of concerns if using a multi-brand setup
+
+---
+
+## STRATEGIC REQUIREMENTS
+
+* Each business must retain a **distinct identity**
+* No design or UX decision should confuse one brand with another
+* If a combined site is used, navigation must clearly separate brands
+* If separate sites are used, shared components may be reused internally
+
+---
+
+## FINAL OUTPUT EXPECTATIONS
+
+You must deliver:
+
+1. A brief explanation of the chosen architecture (separate vs combined)
+2. A high-level overview of each site’s structure and user journey
+3. Key features implemented per business
+4. Rationale for major UX, design, and technical decisions
+5. A solution that is ready for real-world deployment
+
+---
+
+## SUCCESS DEFINITION
+
+The solution is successful if:
+
+* Each business appears credible, modern, and trustworthy
+* Visitors clearly understand what each business offers
+* The websites actively drive conversions, not just aesthetics
+* The system is scalable for future growth and additional brands
+
+
+
+
+You add add recommendations too.
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://awujayz-brand.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/b0555d0f-2963-4b2a-9ce3-1b095e47db6a).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
