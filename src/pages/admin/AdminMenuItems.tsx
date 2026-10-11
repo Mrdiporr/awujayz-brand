@@ -55,7 +55,7 @@ const AdminMenuItems = () => {
   const { data: result, isLoading } = useQuery({
     queryKey: ['menu-items', page, search],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, count, error } = await supabase
         .from('menu_items')
         .select('*', { count: 'exact' })
         .ilike('name', `%${search.replace(/[%(),]/g, '')}%`)
