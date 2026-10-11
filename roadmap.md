@@ -2,6 +2,6 @@
 - [x] Add append-only audit logging for admin mutations
 - [x] Add real-time inquiry refresh and server-side pagination for products/menu
 - [x] Add secure admin user management and role assignment
-- [ ] Connect shop cart to checkout and order confirmation
-- [ ] Add sales metrics to the admin overview
+- [x] Connect shop cart to checkout and order confirmation
+- [x] Add sales metrics to the admin overview
 - [ ] Validate customer journeys and admin operations across desktop and mobile

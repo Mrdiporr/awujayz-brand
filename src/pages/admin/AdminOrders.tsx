@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 type Order = Tables<'orders'>;
 const orderStatuses = ['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'];
 
 const AdminOrders = () => {
+  const [search, setSearch] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: orders, isLoading } = useQuery({
@@ -21,6 +24,7 @@ const AdminOrders = () => {
       return data;
     },
   });
+  const visibleOrders = orders?.filter((order) => `${order.customer_name} ${order.customer_email} ${order.status}`.toLowerCase().includes(search.toLowerCase()));
   const updateMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from('orders').update({ status }).eq('id', id);
@@ -36,10 +40,11 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6">
       <div><h2 className="text-2xl font-display font-bold">Orders</h2><p className="text-muted-foreground">Manage Magic Potion purchases and fulfillment.</p></div>
-      <div className="overflow-hidden rounded-lg border">
-        <div className="grid grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.1fr_1.2fr] gap-4 border-b bg-muted/30 px-4 py-3 text-sm font-medium"><span>Customer</span><span>Shipping</span><span>Total</span><span>Payment</span><span>Status</span><span>Placed</span></div>
-        {isLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div> : orders?.length ? orders.map((order: Order) => (
-          <div key={order.id} className="grid grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.1fr_1.2fr] items-center gap-4 border-b px-4 py-4 text-sm last:border-b-0">
+      <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customer, email, or status..." className="max-w-md" />
+      <div className="overflow-x-auto rounded-lg border">
+        <div className="grid min-w-[850px] grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.1fr_1.2fr] gap-4 border-b bg-muted/30 px-4 py-3 text-sm font-medium"><span>Customer</span><span>Shipping</span><span>Total</span><span>Payment</span><span>Status</span><span>Placed</span></div>
+        {isLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div> : visibleOrders?.length ? visibleOrders.map((order: Order) => (
+          <div key={order.id} className="grid min-w-[850px] grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.1fr_1.2fr] items-center gap-4 border-b px-4 py-4 text-sm last:border-b-0">
             <div><p className="font-medium">{order.customer_name}</p><p className="text-xs text-muted-foreground">{order.customer_email}</p></div>
             <p className="line-clamp-2 text-muted-foreground">{order.shipping_address}</p>
             <span className="font-medium">${order.total.toFixed(2)}</span>
