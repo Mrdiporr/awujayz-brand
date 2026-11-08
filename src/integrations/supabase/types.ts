@@ -209,6 +209,9 @@ export type Database = {
           shipping: number
           shipping_address: string
           status: string
+          stripe_checkout_session_id: string | null
+          stripe_event_id: string | null
+          stripe_payment_intent_id: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -227,6 +230,9 @@ export type Database = {
           shipping?: number
           shipping_address: string
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_event_id?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal: number
           total: number
           updated_at?: string
@@ -245,6 +251,9 @@ export type Database = {
           shipping?: number
           shipping_address?: string
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_event_id?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -262,6 +271,9 @@ export type Database = {
           in_stock: boolean | null
           name: string
           price: number
+          stripe_price_amount: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
         }
         Insert: {
@@ -274,6 +286,9 @@ export type Database = {
           in_stock?: boolean | null
           name: string
           price: number
+          stripe_price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -286,6 +301,9 @@ export type Database = {
           in_stock?: boolean | null
           name?: string
           price?: number
+          stripe_price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Relationships: []
