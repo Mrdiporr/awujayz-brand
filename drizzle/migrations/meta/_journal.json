@@ -8,6 +8,27 @@
       "when": 1791685344457,
       "tag": "0000_restrict_public_catalog_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794139731313,
+      "tag": "0001_add_stripe_checkout_order_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794139788529,
+      "tag": "0002_track_stripe_webhook_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794139872364,
+      "tag": "0003_make_stripe_checkout_requests_idempotent",
+      "breakpoints": true
     }
   ]
 }

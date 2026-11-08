@@ -197,6 +197,7 @@ export type Database = {
       orders: {
         Row: {
           brand: string
+          checkout_request_id: string | null
           created_at: string
           currency: string
           customer_email: string
@@ -209,12 +210,16 @@ export type Database = {
           shipping: number
           shipping_address: string
           status: string
+          stripe_checkout_session_id: string | null
+          stripe_event_id: string | null
+          stripe_payment_intent_id: string | null
           subtotal: number
           total: number
           updated_at: string
         }
         Insert: {
           brand?: string
+          checkout_request_id?: string | null
           created_at?: string
           currency?: string
           customer_email: string
@@ -227,12 +232,16 @@ export type Database = {
           shipping?: number
           shipping_address: string
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_event_id?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal: number
           total: number
           updated_at?: string
         }
         Update: {
           brand?: string
+          checkout_request_id?: string | null
           created_at?: string
           currency?: string
           customer_email?: string
@@ -245,6 +254,9 @@ export type Database = {
           shipping?: number
           shipping_address?: string
           status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_event_id?: string | null
+          stripe_payment_intent_id?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -262,6 +274,9 @@ export type Database = {
           in_stock: boolean | null
           name: string
           price: number
+          stripe_price_amount: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
         }
         Insert: {
@@ -274,6 +289,9 @@ export type Database = {
           in_stock?: boolean | null
           name: string
           price: number
+          stripe_price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -286,6 +304,9 @@ export type Database = {
           in_stock?: boolean | null
           name?: string
           price?: number
+          stripe_price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -323,6 +344,27 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stripe_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          id: string
+          processed_at: string | null
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          id?: string
+          processed_at?: string | null
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          id?: string
+          processed_at?: string | null
         }
         Relationships: []
       }
