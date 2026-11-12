@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { totalInCents, validateCheckoutItems, type CatalogProduct } from './checkout';
 
 const productId = '123e4567-e89b-42d3-a456-426614174000';
-const catalog: CatalogProduct[] = [{
+const product: CatalogProduct = {
   id: productId,
   name: 'Potion Tee',
   description: null,
@@ -12,7 +12,8 @@ const catalog: CatalogProduct[] = [{
   stripe_product_id: null,
   stripe_price_id: null,
   stripe_price_amount: null,
-}];
+};
+const catalog: CatalogProduct[] = [product];
 
 describe('Magic Potion checkout validation', () => {
   it('prices from the catalog rather than accepting a client price', () => {
@@ -26,7 +27,7 @@ describe('Magic Potion checkout validation', () => {
   });
 
   it('rejects an unavailable catalog item', () => {
-    expect(() => validateCheckoutItems([{ productId, quantity: 1, selectedSize: 'M' }], [{ ...catalog[0]!, in_stock: false }])).toThrow();
+    expect(() => validateCheckoutItems([{ productId, quantity: 1, selectedSize: 'M' }], [{ ...product, in_stock: false }])).toThrow();
   });
 
   it('rejects unsupported apparel sizes', () => {
