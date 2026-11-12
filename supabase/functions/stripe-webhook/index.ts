@@ -60,12 +60,21 @@ Deno.serve(async (request) => {
           }
           const nextStatus = ['processing', 'shipped', 'completed'].includes(order.status) ? order.status : 'paid';
           const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
+          const shipping = session.shipping_details;
+          const address = shipping?.address;
+          const shippingAddress = address
+            ? [shipping.name, address.line1, address.line2, address.city, address.state, address.postal_code, address.country].filter(Boolean).join(', ').slice(0, 1000)
+            : '';
           const { error: updateError } = await admin.from('orders').update({
             payment_status: 'paid',
             status: nextStatus,
             stripe_payment_intent_id: paymentIntentId,
             payment_reference: paymentIntentId,
             stripe_event_id: event.id,
+            ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
+            ...(session.customer_details?.name ? { customer_name: session.customer_details.name.slice(0, 200) } : {}),
+            ...(session.customer_details?.email ? { customer_email: session.customer_details.email.slice(0, 320).toLowerCase() } : {}),
+            ...(session.customer_details?.phone ? { customer_phone: session.customer_details.phone.slice(0, 50) } : {}),
           }).eq('id', order.id);
           if (updateError) throw updateError;
         }

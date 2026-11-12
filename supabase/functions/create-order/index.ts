@@ -23,11 +23,9 @@ Deno.serve(async (request) => {
 
     const customerName = cleanText(body.customerName, 200);
     const customerEmail = cleanText(body.customerEmail, 320).toLowerCase();
-    const customerPhone = cleanText(body.customerPhone, 50);
-    const shippingAddress = cleanText(body.shippingAddress, 1000);
     const checkoutRequestId = body.checkoutRequestId;
-    if (!customerName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || !shippingAddress || !isUuid(checkoutRequestId)) {
-      return jsonResponse({ error: 'Please provide a valid name, email, shipping address, and retry checkout.' }, 400);
+    if (!customerName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail) || !isUuid(checkoutRequestId)) {
+      return jsonResponse({ error: 'Please provide a valid name, email, and retry checkout.' }, 400);
     }
 
     const admin = getServiceClient();
@@ -113,8 +111,7 @@ Deno.serve(async (request) => {
         checkout_request_id: checkoutRequestId,
         customer_name: customerName,
         customer_email: customerEmail,
-        customer_phone: customerPhone || null,
-        shipping_address: shippingAddress,
+        shipping_address: 'Shipping address pending secure checkout.',
         subtotal: total / 100,
         shipping: 0,
         total: total / 100,
@@ -164,6 +161,8 @@ Deno.serve(async (request) => {
       line_items: syncedLines.map((line) => ({ price: line.stripePriceId, quantity: line.quantity })),
       customer_email: customerEmail,
       customer_creation: 'always',
+      shipping_address_collection: { allowed_countries: ['US'] },
+      phone_number_collection: { enabled: true },
       client_reference_id: order.id,
       metadata: { order_id: order.id, brand: 'magic-potion' },
       payment_intent_data: { metadata: { order_id: order.id, brand: 'magic-potion' } },
