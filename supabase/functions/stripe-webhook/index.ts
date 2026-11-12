@@ -31,19 +31,12 @@ Deno.serve(async (request) => {
     );
     const admin = getServiceClient();
 
-    const { error: eventInsertError } = await admin.from('stripe_webhook_events').upsert({
-      event_id: event.id,
-      event_type: event.type,
-    }, { onConflict: 'event_id', ignoreDuplicates: true });
-    if (eventInsertError) throw eventInsertError;
-
-    const { data: storedEvent, error: eventReadError } = await admin
-      .from('stripe_webhook_events')
-      .select('processed_at')
-      .eq('event_id', event.id)
-      .single();
-    if (eventReadError) throw eventReadError;
-    if (storedEvent.processed_at) return jsonResponse({ received: true, duplicate: true });
+    const { data: shouldProcess, error: claimError } = await admin.rpc('claim_stripe_webhook_event', {
+      p_event_id: event.id,
+      p_event_type: event.type,
+    });
+    if (claimError) throw claimError;
+    if (!shouldProcess) return jsonResponse({ received: true, duplicate: true });
 
     const orderId = orderIdFromEvent(event);
     if (orderId && ['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
@@ -92,13 +85,11 @@ Deno.serve(async (request) => {
       }).eq('id', orderId).eq('stripe_checkout_session_id', session.id).eq('payment_status', 'unpaid').eq('status', 'pending');
       if (updateError) throw updateError;
     } else if (orderId && event.type === 'payment_intent.payment_failed') {
-      const intent = event.data.object as PaymentIntent;
       const { error: updateError } = await admin.from('orders').update({
         payment_status: 'failed',
         stripe_event_id: event.id,
       }).eq('id', orderId).eq('payment_status', 'unpaid');
       if (updateError) throw updateError;
-      if (intent.id.length < 8) throw new Error('Stripe payment reference is invalid.');
     }
 
     const { error: markProcessedError } = await admin.from('stripe_webhook_events')
