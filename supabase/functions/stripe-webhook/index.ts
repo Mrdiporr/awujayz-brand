@@ -46,88 +46,49 @@ Deno.serve(async (request) => {
     ]);
     if (!supportedEvents.has(event.type)) return jsonResponse({ received: true, ignored: true });
 
-    const { data: shouldProcess, error: claimError } = await admin.rpc('claim_stripe_webhook_event', {
-      p_event_id: event.id,
-      p_event_type: event.type,
-    });
-    if (claimError) throw claimError;
-    if (!shouldProcess) return jsonResponse({ received: true, duplicate: true });
-
     const orderId = orderIdFromEvent(event);
     if (!orderId) {
-      const { error: ignoredError } = await admin.from('stripe_webhook_events').update({ processed_at: new Date().toISOString() }).eq('event_id', event.id);
-      if (ignoredError) throw ignoredError;
       return jsonResponse({ received: true, ignored: true });
     }
-    if (orderId && ['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
-      const session = event.data.object as CheckoutSession;
-      if (session.payment_status === 'paid') {
-        const { data: order, error: orderError } = await admin
-          .from('orders')
-          .select('id,total,currency,status,stripe_checkout_session_id')
-          .eq('id', orderId)
-          .maybeSingle();
-        if (orderError) throw orderError;
-        if (order) {
-          const expectedTotal = Math.round(Number(order.total) * 100);
-          if (
-            order.stripe_checkout_session_id !== session.id ||
-            (session.amount_subtotal ?? session.amount_total) !== expectedTotal ||
-            session.currency !== order.currency.toLowerCase() ||
-            session.amount_total === null
-          ) {
-            console.error('Stripe session does not match the stored order.');
-            return jsonResponse({ error: 'Payment details do not match this order.' }, 400);
-          }
-          const nextStatus = ['processing', 'shipped', 'completed'].includes(order.status) ? order.status : 'paid';
-          const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
-          const shipping = session.shipping_details;
-          const address = shipping?.address;
-          const shippingAddress = address
-            ? [shipping.name, address.line1, address.line2, address.city, address.state, address.postal_code, address.country].filter(Boolean).join(', ').slice(0, 1000)
-            : '';
-          const { error: updateError } = await admin.from('orders').update({
-            payment_status: 'paid',
-            status: nextStatus,
-            stripe_payment_intent_id: paymentIntentId,
-            payment_reference: paymentIntentId,
-            stripe_event_id: event.id,
-            tax_amount: Math.max(0, (session.total_details?.amount_tax ?? 0) / 100),
-            ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
-            ...(session.customer_details?.name ? { customer_name: session.customer_details.name.slice(0, 200) } : {}),
-            ...(session.customer_details?.email ? { customer_email: session.customer_details.email.slice(0, 320).toLowerCase() } : {}),
-            ...(session.customer_details?.phone ? { customer_phone: session.customer_details.phone.slice(0, 50) } : {}),
-          }).eq('id', order.id);
-          if (updateError) throw updateError;
-        }
-      }
-    } else if (orderId && event.type === 'checkout.session.async_payment_failed') {
-      const session = event.data.object as CheckoutSession;
-      const { error: updateError } = await admin.from('orders').update({
-        payment_status: 'failed',
-        stripe_event_id: event.id,
-      }).eq('id', orderId).eq('stripe_checkout_session_id', session.id).eq('payment_status', 'unpaid');
-      if (updateError) throw updateError;
-    } else if (orderId && event.type === 'checkout.session.expired') {
-      const session = event.data.object as CheckoutSession;
-      const { error: updateError } = await admin.from('orders').update({
-        status: 'cancelled',
-        stripe_event_id: event.id,
-      }).eq('id', orderId).eq('stripe_checkout_session_id', session.id).eq('payment_status', 'unpaid').eq('status', 'pending');
-      if (updateError) throw updateError;
-    } else if (orderId && event.type === 'payment_intent.payment_failed') {
-      const { error: updateError } = await admin.from('orders').update({
-        payment_status: 'failed',
-        stripe_event_id: event.id,
-      }).eq('id', orderId).eq('payment_status', 'unpaid');
-      if (updateError) throw updateError;
+    let payload: CheckoutSession | PaymentIntent;
+    if (event.type.startsWith('checkout.session.')) {
+      payload = event.data.object as CheckoutSession;
+    } else {
+      const intent = event.data.object as PaymentIntent;
+      const sessionList = await stripe.checkout.sessions.list({ payment_intent: intent.id, limit: 1 });
+      const session = sessionList.data[0];
+      if (!session) return jsonResponse({ received: true, ignored: true });
+      payload = session;
     }
 
-    const { error: markProcessedError } = await admin.from('stripe_webhook_events')
-      .update({ processed_at: new Date().toISOString() })
-      .eq('event_id', event.id);
-    if (markProcessedError) throw markProcessedError;
-    return jsonResponse({ received: true });
+    const session = payload as CheckoutSession;
+    const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
+    const shipping = session.shipping_details;
+    const address = shipping?.address;
+    const shippingAddress = address
+      ? [shipping.name, address.line1, address.line2, address.city, address.state, address.postal_code, address.country].filter(Boolean).join(', ').slice(0, 1000)
+      : null;
+    const { data: result, error: processError } = await admin.rpc('process_stripe_checkout_event', {
+      p_event_id: event.id,
+      p_event_type: event.type,
+      p_order_id: orderId,
+      p_session_id: session.id,
+      p_payment_intent_id: paymentIntentId,
+      p_amount_subtotal: session.amount_subtotal,
+      p_amount_total: session.amount_total,
+      p_currency: session.currency,
+      p_tax_amount: session.total_details?.amount_tax ?? 0,
+      p_shipping_address: shippingAddress,
+      p_customer_name: session.customer_details?.name ?? null,
+      p_customer_email: session.customer_details?.email ?? null,
+      p_customer_phone: session.customer_details?.phone ?? null,
+    });
+    if (processError) throw processError;
+    if (result === 'mismatch') {
+      console.error('Stripe session does not match its stored order.');
+      return jsonResponse({ error: 'Payment details do not match this order.' }, 400);
+    }
+    return jsonResponse({ received: true, result });
   } catch (error) {
     console.error('stripe-webhook error:', error instanceof Error ? error.message : 'unknown error');
     if (error instanceof Stripe.errors.StripeSignatureVerificationError) {
