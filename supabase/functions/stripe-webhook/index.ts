@@ -1,13 +1,20 @@
 import Stripe from 'npm:stripe@18.5.0';
+import { z } from 'npm:zod@4.6.7';
 import { corsHeaders, getServiceClient, getStripeClient, jsonResponse } from '../_shared/stripe.ts';
 
 type CheckoutSession = Stripe.Checkout.Session;
 type PaymentIntent = Stripe.PaymentIntent;
+const checkoutMetadataSchema = z.object({ order_id: z.string().uuid(), brand: z.literal('magic-potion') });
 
 function orderIdFromEvent(event: Stripe.Event): string | null {
   const object = event.data.object as CheckoutSession | PaymentIntent;
-  if ('metadata' in object && typeof object.metadata?.order_id === 'string') return object.metadata.order_id;
-  if ('client_reference_id' in object && typeof object.client_reference_id === 'string') return object.client_reference_id;
+  if ('metadata' in object && object.metadata) {
+    const parsed = checkoutMetadataSchema.safeParse(object.metadata);
+    if (parsed.success) return parsed.data.order_id;
+  }
+  if ('client_reference_id' in object && typeof object.client_reference_id === 'string' && z.string().uuid().safeParse(object.client_reference_id).success) {
+    return object.client_reference_id;
+  }
   return null;
 }
 
@@ -30,6 +37,14 @@ Deno.serve(async (request) => {
       Stripe.createSubtleCryptoProvider(),
     );
     const admin = getServiceClient();
+    const supportedEvents = new Set([
+      'checkout.session.completed',
+      'checkout.session.async_payment_succeeded',
+      'checkout.session.async_payment_failed',
+      'checkout.session.expired',
+      'payment_intent.payment_failed',
+    ]);
+    if (!supportedEvents.has(event.type)) return jsonResponse({ received: true, ignored: true });
 
     const { data: shouldProcess, error: claimError } = await admin.rpc('claim_stripe_webhook_event', {
       p_event_id: event.id,
@@ -39,6 +54,11 @@ Deno.serve(async (request) => {
     if (!shouldProcess) return jsonResponse({ received: true, duplicate: true });
 
     const orderId = orderIdFromEvent(event);
+    if (!orderId) {
+      const { error: ignoredError } = await admin.from('stripe_webhook_events').update({ processed_at: new Date().toISOString() }).eq('event_id', event.id);
+      if (ignoredError) throw ignoredError;
+      return jsonResponse({ received: true, ignored: true });
+    }
     if (orderId && ['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
       const session = event.data.object as CheckoutSession;
       if (session.payment_status === 'paid') {
