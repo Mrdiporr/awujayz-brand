@@ -353,18 +353,21 @@ export type Database = {
           event_type: string
           id: string
           processed_at: string | null
+          processing_at: string | null
         }
         Insert: {
           event_id: string
           event_type: string
           id?: string
           processed_at?: string | null
+          processing_at?: string | null
         }
         Update: {
           event_id?: string
           event_type?: string
           id?: string
           processed_at?: string | null
+          processing_at?: string | null
         }
         Relationships: []
       }
@@ -394,7 +397,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_stripe_webhook_event: {
+        Args: { p_event_id: string; p_event_type: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
