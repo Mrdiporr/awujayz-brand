@@ -29,6 +29,27 @@
       "when": 1794139872364,
       "tag": "0003_make_stripe_checkout_requests_idempotent",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794442800014,
+      "tag": "0004_claim_stripe_webhook_events_safely",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794442936069,
+      "tag": "0005_track_stripe_order_tax_amount",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794442998370,
+      "tag": "0006_apply_stripe_payment_events_atomically",
+      "breakpoints": true
     }
   ]
 }

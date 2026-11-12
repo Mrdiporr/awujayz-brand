@@ -214,6 +214,7 @@ export type Database = {
           stripe_event_id: string | null
           stripe_payment_intent_id: string | null
           subtotal: number
+          tax_amount: number
           total: number
           updated_at: string
         }
@@ -236,6 +237,7 @@ export type Database = {
           stripe_event_id?: string | null
           stripe_payment_intent_id?: string | null
           subtotal: number
+          tax_amount?: number
           total: number
           updated_at?: string
         }
@@ -258,6 +260,7 @@ export type Database = {
           stripe_event_id?: string | null
           stripe_payment_intent_id?: string | null
           subtotal?: number
+          tax_amount?: number
           total?: number
           updated_at?: string
         }
@@ -353,18 +356,21 @@ export type Database = {
           event_type: string
           id: string
           processed_at: string | null
+          processing_at: string | null
         }
         Insert: {
           event_id: string
           event_type: string
           id?: string
           processed_at?: string | null
+          processing_at?: string | null
         }
         Update: {
           event_id?: string
           event_type?: string
           id?: string
           processed_at?: string | null
+          processing_at?: string | null
         }
         Relationships: []
       }
@@ -394,7 +400,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_stripe_webhook_event: {
+        Args: { p_event_id: string; p_event_type: string }
+        Returns: boolean
+      }
+      process_stripe_checkout_event: {
+        Args: {
+          p_amount_subtotal: number
+          p_amount_total: number
+          p_currency: string
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_event_id: string
+          p_event_type: string
+          p_order_id: string
+          p_payment_intent_id: string
+          p_session_id: string
+          p_shipping_address: string
+          p_tax_amount: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user"

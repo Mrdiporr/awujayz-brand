@@ -47,7 +47,7 @@ const AdminOrders = () => {
           <div key={order.id} className="grid min-w-[850px] grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.1fr_1.2fr] items-center gap-4 border-b px-4 py-4 text-sm last:border-b-0">
             <div><p className="font-medium">{order.customer_name}</p><p className="text-xs text-muted-foreground">{order.customer_email}</p></div>
             <p className="line-clamp-2 text-muted-foreground">{order.shipping_address}</p>
-            <span className="font-medium">${order.total.toFixed(2)}</span>
+            <span className="font-medium">${(Number(order.total) + Number(order.tax_amount ?? 0)).toFixed(2)}{Number(order.tax_amount ?? 0) > 0 && <span className="block text-xs text-muted-foreground">incl. tax</span>}</span>
             <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>{order.payment_status}</Badge>
             <Select value={order.status} onValueChange={(status) => updateMutation.mutate({ id: order.id, status })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{orderStatuses.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectContent></Select>
             <time className="text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</time>

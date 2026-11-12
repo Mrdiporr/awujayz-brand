@@ -41,7 +41,7 @@ export function validateCheckoutItems(
     if (
       typeof item.productId !== 'string' ||
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.productId) ||
-      !Number.isInteger(item.quantity) || item.quantity! < 1 || item.quantity! > 20 ||
+      typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 20 ||
       typeof item.selectedSize !== 'string' || !validSizes.has(item.selectedSize)
     ) {
       throw new Error('One or more cart items are invalid.');
@@ -70,5 +70,9 @@ export function validateCheckoutItems(
 }
 
 export function totalInCents(lines: ValidatedCheckoutLine[]): number {
-  return lines.reduce((sum, line) => sum + line.unitAmount * line.quantity, 0);
+  const total = lines.reduce((sum, line) => sum + line.unitAmount * line.quantity, 0);
+  if (!Number.isSafeInteger(total) || total < 1 || total > 99_999_999) {
+    throw new Error('Your order total is outside the supported payment range.');
+  }
+  return total;
 }
