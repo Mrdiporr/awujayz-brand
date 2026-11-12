@@ -214,6 +214,7 @@ export type Database = {
           stripe_event_id: string | null
           stripe_payment_intent_id: string | null
           subtotal: number
+          tax_amount: number
           total: number
           updated_at: string
         }
@@ -236,6 +237,7 @@ export type Database = {
           stripe_event_id?: string | null
           stripe_payment_intent_id?: string | null
           subtotal: number
+          tax_amount?: number
           total: number
           updated_at?: string
         }
@@ -258,6 +260,7 @@ export type Database = {
           stripe_event_id?: string | null
           stripe_payment_intent_id?: string | null
           subtotal?: number
+          tax_amount?: number
           total?: number
           updated_at?: string
         }
