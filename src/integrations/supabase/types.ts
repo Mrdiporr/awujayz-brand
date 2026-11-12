@@ -404,6 +404,24 @@ export type Database = {
         Args: { p_event_id: string; p_event_type: string }
         Returns: boolean
       }
+      process_stripe_checkout_event: {
+        Args: {
+          p_amount_subtotal: number
+          p_amount_total: number
+          p_currency: string
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_event_id: string
+          p_event_type: string
+          p_order_id: string
+          p_payment_intent_id: string
+          p_session_id: string
+          p_shipping_address: string
+          p_tax_amount: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user"
