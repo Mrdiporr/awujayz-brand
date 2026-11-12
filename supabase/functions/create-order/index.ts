@@ -163,6 +163,7 @@ Deno.serve(async (request) => {
       customer_creation: 'always',
       shipping_address_collection: { allowed_countries: ['US'] },
       phone_number_collection: { enabled: true },
+      automatic_tax: { enabled: true },
       client_reference_id: order.id,
       metadata: { order_id: order.id, brand: 'magic-potion' },
       payment_intent_data: { metadata: { order_id: order.id, brand: 'magic-potion' } },

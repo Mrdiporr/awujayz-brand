@@ -20,13 +20,16 @@ Deno.serve(async (request) => {
 
     const admin = getServiceClient();
     const { data: order, error } = await admin.from('orders')
-      .select('id,total,payment_status,status,stripe_checkout_session_id')
+      .select('id,total,payment_status,status,stripe_checkout_session_id,currency')
       .eq('id', orderId)
       .eq('stripe_checkout_session_id', session.id)
       .maybeSingle();
     if (error) throw error;
     if (!order) return jsonResponse({ error: 'Order not found.' }, 404);
-    if (session.amount_total !== Math.round(Number(order.total) * 100) || session.currency !== 'usd') {
+    if (
+      (session.amount_subtotal ?? session.amount_total) !== Math.round(Number(order.total) * 100) ||
+      session.currency !== order.currency.toLowerCase()
+    ) {
       return jsonResponse({ error: 'Checkout details do not match this order.' }, 409);
     }
 

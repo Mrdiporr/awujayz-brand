@@ -52,8 +52,9 @@ Deno.serve(async (request) => {
           const expectedTotal = Math.round(Number(order.total) * 100);
           if (
             order.stripe_checkout_session_id !== session.id ||
-            session.amount_total !== expectedTotal ||
-            session.currency !== order.currency.toLowerCase()
+            (session.amount_subtotal ?? session.amount_total) !== expectedTotal ||
+            session.currency !== order.currency.toLowerCase() ||
+            session.amount_total === null
           ) {
             console.error('Stripe session does not match the stored order.');
             return jsonResponse({ error: 'Payment details do not match this order.' }, 400);
@@ -71,6 +72,7 @@ Deno.serve(async (request) => {
             stripe_payment_intent_id: paymentIntentId,
             payment_reference: paymentIntentId,
             stripe_event_id: event.id,
+            tax_amount: Math.max(0, (session.total_details?.amount_tax ?? 0) / 100),
             ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
             ...(session.customer_details?.name ? { customer_name: session.customer_details.name.slice(0, 200) } : {}),
             ...(session.customer_details?.email ? { customer_email: session.customer_details.email.slice(0, 320).toLowerCase() } : {}),
