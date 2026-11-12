@@ -14,11 +14,11 @@ const AdminDashboard = () => {
         supabase.from('inquiries').select('*', { count: 'exact', head: true }),
         supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('products').select('*', { count: 'exact', head: true }).eq('in_stock', true),
-        supabase.from('orders').select('id,total,status,payment_status,created_at,customer_name').order('created_at', { ascending: false }).limit(50),
+        supabase.from('orders').select('id,total,tax_amount,status,payment_status,created_at,customer_name').order('created_at', { ascending: false }).limit(50),
         supabase.from('inquiries').select('*').order('created_at', { ascending: false }).limit(5),
       ]);
       const orderRows = orders.data ?? [];
-      return { inquiries: inquiries.count ?? 0, fresh: fresh.count ?? 0, products: products.count ?? 0, orders: orderRows.length, revenue: orderRows.filter((order) => order.payment_status === 'paid').reduce((sum, order) => sum + Number(order.total), 0), recent: recent.data ?? [], recentOrders: orderRows.slice(0, 5) };
+      return { inquiries: inquiries.count ?? 0, fresh: fresh.count ?? 0, products: products.count ?? 0, orders: orderRows.length, revenue: orderRows.filter((order) => order.payment_status === 'paid').reduce((sum, order) => sum + Number(order.total) + Number(order.tax_amount ?? 0), 0), recent: recent.data ?? [], recentOrders: orderRows.slice(0, 5) };
     },
   });
   const metrics = [

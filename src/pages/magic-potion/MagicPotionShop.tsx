@@ -73,7 +73,7 @@ const MagicPotionShop = () => {
               id: data.orderId as string,
               total: Number(data.total),
               paymentStatus: data.paymentStatus as string,
-              status: data.status as string,
+              status: data.orderStatus as string,
             };
             setOrder(confirmedOrder);
             if (confirmedOrder.paymentStatus === 'paid') {
