@@ -3,11 +3,10 @@ import { z } from 'npm:zod@4.6.7';
 import { corsHeaders, getServiceClient, getStripeClient, jsonResponse } from '../_shared/stripe.ts';
 
 type CheckoutSession = Stripe.Checkout.Session;
-type PaymentIntent = Stripe.PaymentIntent;
 const checkoutMetadataSchema = z.object({ order_id: z.string().uuid(), brand: z.literal('magic-potion') });
 
 function orderIdFromEvent(event: Stripe.Event): string | null {
-  const object = event.data.object as CheckoutSession | PaymentIntent;
+  const object = event.data.object as CheckoutSession;
   if ('metadata' in object && object.metadata) {
     const parsed = checkoutMetadataSchema.safeParse(object.metadata);
     if (parsed.success) return parsed.data.order_id;
@@ -28,6 +27,7 @@ Deno.serve(async (request) => {
 
   try {
     const payload = await request.text();
+    if (payload.length > 1_000_000) return jsonResponse({ error: 'Webhook payload is too large.' }, 413);
     const stripe = getStripeClient();
     const event = await stripe.webhooks.constructEventAsync(
       payload,
@@ -42,7 +42,6 @@ Deno.serve(async (request) => {
       'checkout.session.async_payment_succeeded',
       'checkout.session.async_payment_failed',
       'checkout.session.expired',
-      'payment_intent.payment_failed',
     ]);
     if (!supportedEvents.has(event.type)) return jsonResponse({ received: true, ignored: true });
 
@@ -50,18 +49,7 @@ Deno.serve(async (request) => {
     if (!orderId) {
       return jsonResponse({ received: true, ignored: true });
     }
-    let payload: CheckoutSession | PaymentIntent;
-    if (event.type.startsWith('checkout.session.')) {
-      payload = event.data.object as CheckoutSession;
-    } else {
-      const intent = event.data.object as PaymentIntent;
-      const sessionList = await stripe.checkout.sessions.list({ payment_intent: intent.id, limit: 1 });
-      const session = sessionList.data[0];
-      if (!session) return jsonResponse({ received: true, ignored: true });
-      payload = session;
-    }
-
-    const session = payload as CheckoutSession;
+    const session = event.data.object as CheckoutSession;
     const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : null;
     const shipping = session.shipping_details;
     const address = shipping?.address;
