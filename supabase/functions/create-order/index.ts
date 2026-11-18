@@ -58,12 +58,14 @@ Deno.serve(async (request) => {
         await stripe.products.update(stripeProductId, {
           name: product.name.slice(0, 250),
           description: safeDescription || undefined,
+          tax_code: 'txcd_99999999',
           active: true,
         });
       } else {
         const createdProduct = await stripe.products.create({
           name: product.name.slice(0, 250),
           description: safeDescription || undefined,
+          tax_code: 'txcd_99999999',
           metadata: { internal_product_id: product.id, brand: 'magic-potion' },
         }, { idempotencyKey: `magic-potion-product-${product.id}` });
         stripeProductId = createdProduct.id;
